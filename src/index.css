@@ -1,0 +1,215 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ======================================================== */
+/* DRISHTI MINING OPERATIONS & TELEMETRY DESIGN SYSTEM      */
+/* ======================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* Carbon Dark Canvas (Decoupled base background) */
+  --bg-canvas: #0B0D11;
+  --bg-canvas-subtle: #101216;
+  --bg-canvas-surface: #14171D;
+
+  /* Frosted Smoked Glass Surfaces */
+  --surface-glass: rgba(18, 20, 24, 0.75);
+  --surface-glass-border: rgba(255, 255, 255, 0.12);
+  --surface-glass-border-subtle: rgba(255, 255, 255, 0.06);
+  --surface-glass-inner: rgba(255, 255, 255, 0.08);
+  --surface-subtle: rgba(255, 255, 255, 0.035);
+  --surface-active: rgba(255, 255, 255, 0.09);
+
+  /* Editorial Text Tokens */
+  --text-primary: #EAEAEA;
+  --text-secondary: #B8B8B8;
+  --text-muted: #757575;
+  --text-subtle: #505050;
+
+  /* Smoked Glass Depth Shadows & Inset Metallic Edge */
+  --shadow-glass:
+    0 16px 45px -10px rgba(0, 0, 0, 0.85),
+    0 3px 12px -2px rgba(0, 0, 0, 0.60);
+
+  --shadow-card:
+    0 6px 24px -4px rgba(0, 0, 0, 0.70),
+    0 1px 4px 0 rgba(0, 0, 0, 0.40);
+
+  --shadow-inset: inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* ======================================================== */
+/* TYPOGRAPHY HIERARCHY                                     */
+/* 1. Editorial Serif (Newsreader) for titles & headings    */
+/* 2. Clean sans-serif (Inter) for data, telemetry & UI      */
+/* 3. JetBrains Mono for coordinates, speeds & numbers      */
+/* ======================================================== */
+
+@font-face {
+  font-family: 'Anthropic Serif';
+  src: local('Anthropic Serif'), local('AnthropicSerif-Regular');
+  font-display: swap;
+}
+
+@layer base {
+  * {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  *:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.45);
+    outline-offset: 2px;
+  }
+  body {
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Editorial Serif Headings & Display Titles */
+  h1, h2, h3, h4, h5, h6, .font-serif-heading, .font-anthropic {
+    font-family: "Anthropic Serif", "Newsreader", "Times New Roman", serif;
+    letter-spacing: -0.015em;
+  }
+}
+
+.font-serif {
+  font-family: "Anthropic Serif", "Newsreader", "Times New Roman", serif;
+}
+
+.font-serif-display {
+  font-family: "Anthropic Serif", "Times New Roman", serif;
+}
+
+.font-serif-body {
+  font-family: "Times New Roman", Times, serif;
+}
+
+/* ======================================================== */
+/* FROSTED GLASS PANELS & SURFACES                          */
+/* ======================================================== */
+
+.glass-panel {
+  background: var(--surface-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--surface-glass-border);
+  box-shadow: var(--shadow-glass), var(--shadow-inset);
+}
+
+.glass-panel-subtle {
+  background: var(--surface-subtle);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--surface-glass-border-subtle);
+  box-shadow: var(--shadow-card);
+}
+
+.glass-panel-active {
+  background: var(--surface-active);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: var(--shadow-glass), var(--shadow-inset);
+}
+
+/* Interactive Glass Transitions */
+.glass-interactive {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-interactive:hover {
+  background: var(--surface-active);
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateY(-1px);
+}
+.glass-interactive:active {
+  transform: translateY(0);
+}
+
+/* ======================================================== */
+/* RESTRAINED METALLIC BUTTONS                              */
+/* ======================================================== */
+
+.btn-chrome-primary {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: linear-gradient(180deg, #26282B 0%, #121417 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.60), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-chrome-primary:hover {
+  background: linear-gradient(180deg, #303337 0%, #17191D 100%);
+  border-color: rgba(255, 255, 255, 0.30);
+  transform: translateY(-1px);
+}
+.btn-chrome-primary:active {
+  transform: translateY(0);
+}
+
+.btn-chrome-secondary {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--text-primary);
+  border: 1px solid var(--surface-glass-border);
+  box-shadow: var(--shadow-card), var(--shadow-inset);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-chrome-secondary:hover {
+  background: var(--surface-active);
+  border-color: rgba(255, 255, 255, 0.24);
+  transform: translateY(-1px);
+}
+.btn-chrome-secondary:active {
+  transform: translateY(0);
+}
+
+.btn-chrome-danger {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: linear-gradient(180deg, #881326 0%, #580B17 100%);
+  color: #FFE4E8;
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-chrome-danger:hover {
+  background: linear-gradient(180deg, #9F122B 0%, #680C1B 100%);
+  border-color: rgba(244, 63, 94, 0.50);
+  transform: translateY(-1px);
+}
+.btn-chrome-danger:active {
+  transform: translateY(0);
+}
+
+/* ======================================================== */
+/* INDUSTRIAL SCROLLBARS                                    */
+/* ======================================================== */
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* Monospace numerals & telemetry alignment */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

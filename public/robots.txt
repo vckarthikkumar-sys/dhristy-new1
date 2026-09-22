@@ -1,0 +1,4 @@
+# DRISHTI Mining Operations Platform
+# Internal operational dashboard - Disallow public crawler indexing of telemetry and control surfaces
+User-agent: *
+Disallow: /
