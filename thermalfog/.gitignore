@@ -1,0 +1,12 @@
+.vercel
+__pycache__/
+*.pyc
+*.zip
+dataset_output/
+static/samples/custom/
+.env
+.DS_Store
+
+dataset_roboflow/
+roboflow_dataset/
+runs/

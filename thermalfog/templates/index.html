@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thermal Fog Vision AI · Intelligent Dashcam HUD & Infrared Perception</title>
+    <!-- Modern Typography: Inter for UI, JetBrains Mono for telemetry, Outfit for bold gauges -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Core Automotive Cockpit Style -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="cockpit-theme">
+
+    <!-- TOP COCKPIT HEADER (Compact, Minimal, Automotive) -->
+    <header class="cockpit-header">
+        <div class="header-left">
+            <div class="brand-optic" id="brandOptic">
+                <span class="optic-reticle"></span>
+                <i class="fa-solid fa-eye-low-vision"></i>
+            </div>
+            <div class="brand-text">
+                <div class="brand-row">
+                    <span class="brand-title">THERMAL FOG VISION AI</span>
+                    <span class="brand-badge">LWIR ADAS</span>
+                </div>
+                <span class="brand-subtitle">AI-POWERED INFRARED PERCEPTION · LOW-VISIBILITY ENVIRONMENTS</span>
+            </div>
+        </div>
+
+        <!-- Center Cockpit Telemetry Indicators -->
+        <div class="header-status-cluster">
+            <div class="status-pill status-sensor" id="sensorStatusPill">
+                <span class="status-dot dot-live"></span>
+                <span class="status-label">FEED:</span>
+                <span id="headerFeedMode" class="status-val">READY</span>
+            </div>
+
+            <div class="status-pill status-threat" id="hazardPill">
+                <span class="status-dot dot-threat" id="threatDot"></span>
+                <span class="status-label">RISK:</span>
+                <span id="threatText" class="status-val">PATH CLEAR</span>
+            </div>
+
+            <div class="status-pill status-engine">
+                <i class="fa-solid fa-microchip"></i>
+                <span id="sysEngine" class="status-val">PyTorch YOLOv8</span>
+            </div>
+
+            <div class="status-pill status-system-online">
+                <span class="status-dot dot-online"></span>
+                <span id="sysStatus" class="status-val">ONLINE</span>
+            </div>
+
+            <div class="status-pill status-clock font-mono" id="cockpitClock">
+                12:00:00
+            </div>
+        </div>
+
+        <!-- Header Right: Quick Navigation & Animated Menu Button -->
+        <div class="header-actions">
+            <nav class="quick-nav" id="quickNav">
+                <button class="nav-btn active" data-tab="tab-stream" title="Live Camera & Synthetic Simulator">
+                    <i class="fa-solid fa-satellite-dish"></i> <span>Live Vision</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-thermal" title="Infrared Physics & Atmospheric Metrics">
+                    <i class="fa-solid fa-smog"></i> <span>Thermal Physics</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-detections" title="Target Classification & Detection Logs">
+                    <i class="fa-solid fa-crosshairs"></i> <span>Detections</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-analytics" title="Telemetry & Sensor Diagnostics">
+                    <i class="fa-solid fa-chart-simple"></i> <span>Telemetry</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-image" title="Presets & Sample Workbench">
+                    <i class="fa-solid fa-sliders"></i> <span>Workbench</span>
+                </button>
+            </nav>
+
+            <button class="icon-btn" id="audioAlertToggle" title="Toggle Hazard Radar Audio Alert">
+                <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+            </button>
+
+            <!-- Animated Menu Button (Hamburger -> Close 'X') -->
+            <button class="menu-toggle-btn" id="menuToggleBtn" aria-label="Open System Menu">
+                <span class="menu-bar bar-1"></span>
+                <span class="menu-bar bar-2"></span>
+                <span class="menu-bar bar-3"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- CINEMATIC ANIMATED BACKDROP & SYSTEM MENU OVERLAY -->
+    <div class="menu-backdrop" id="menuBackdrop">
+        <aside class="menu-drawer" id="menuDrawer">
+            <div class="menu-drawer-header">
+                <div class="drawer-title-group">
+                    <span class="drawer-sub">SYSTEM NAVIGATION</span>
+                    <h2 class="drawer-title">THERMAL VISION OPERATING SYSTEM</h2>
+                </div>
+                <button class="menu-close-btn" id="menuCloseBtn" aria-label="Close Menu">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <nav class="drawer-nav" id="drawerNav">
+                <a href="#stream" class="drawer-item active" data-tab="tab-stream" style="--i: 0;">
+                    <div class="item-left">
+                        <span class="item-num">01</span>
+                        <div class="item-icon-box"><i class="fa-solid fa-satellite-dish"></i></div>
+                        <div class="item-text">
+                            <span class="item-heading">LIVE CAMERA STREAM</span>
+                            <span class="item-desc">Real-time LWIR webcam feed, synthetic thermal simulator & YOLOv8 HUD</span>
+                        </div>
+                    </div>
+                    <span class="item-badge">PRIMARY DISPLAY</span>
+                </a>
+
+                <a href="#thermal" class="drawer-item" data-tab="tab-thermal" style="--i: 1;">
+                    <div class="item-left">
+                        <span class="item-num">02</span>
+                        <div class="item-icon-box"><i class="fa-solid fa-smog"></i></div>
+                        <div class="item-text">
+                            <span class="item-heading">THERMAL ANALYSIS</span>
+                            <span class="item-desc">Atmospheric scattering, fog severity %, Koschmieder optical law & transmittance τ</span>
+                        </div>
+                    </div>
+                    <span class="item-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                </a>
+
+                <a href="#detections" class="drawer-item" data-tab="tab-detections" style="--i: 2;">
+                    <div class="item-left">
+                        <span class="item-num">03</span>
+                        <div class="item-icon-box"><i class="fa-solid fa-crosshairs"></i></div>
+                        <div class="item-text">
+                            <span class="item-heading">AI DETECTIONS & LOGS</span>
+                            <span class="item-desc">Target breakdown: pedestrians, vehicles, wildlife, bounding coordinates & confidence</span>
+                        </div>
+                    </div>
+                    <span class="item-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                </a>
+
+                <a href="#telemetry" class="drawer-item" data-tab="tab-analytics" style="--i: 3;">
+                    <div class="item-left">
+                        <span class="item-num">04</span>
+                        <div class="item-icon-box"><i class="fa-solid fa-chart-simple"></i></div>
+                        <div class="item-text">
+                            <span class="item-heading">TELEMETRY & SENSORS</span>
+                            <span class="item-desc">Inference latency, frame rate, spatial blur attenuation, contrast standard deviation</span>
+                        </div>
+                    </div>
+                    <span class="item-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                </a>
+
+                <a href="#workbench" class="drawer-item" data-tab="tab-image" style="--i: 4;">
+                    <div class="item-left">
+                        <span class="item-num">05</span>
+                        <div class="item-icon-box"><i class="fa-solid fa-sliders"></i></div>
+                        <div class="item-text">
+                            <span class="item-heading">SAMPLE WORKBENCH</span>
+                            <span class="item-desc">FLIR, KAIST, SIH thermal benchmark presets & dataset archive importer</span>
+                        </div>
+                    </div>
+                    <span class="item-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                </a>
+
+                <a href="#model" class="drawer-item" data-tab="tab-model" style="--i: 5;">
+                    <div class="item-left">
+                        <span class="item-num">06</span>
+                        <div class="item-icon-box"><i class="fa-solid fa-microchip"></i></div>
+                        <div class="item-text">
+                            <span class="item-heading">MODEL ARCHITECTURE</span>
+                            <span class="item-desc">Ultralytics YOLOv8n network specifications, 640×640 px input, PyTorch & ONNX</span>
+                        </div>
+                    </div>
+                    <span class="item-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                </a>
+
+                <a href="#settings" class="drawer-item" id="drawerSettingsBtn" style="--i: 6;">
+                    <div class="item-left">
+                        <span class="item-num">07</span>
+                        <div class="item-icon-box"><i class="fa-solid fa-gear"></i></div>
+                        <div class="item-text">
+                            <span class="item-heading">SYSTEM SETTINGS</span>
+                            <span class="item-desc">Detection confidence, NMS IoU thresholds, CLAHE enhancement, fog heatmap mask</span>
+                        </div>
+                    </div>
+                    <span class="item-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                </a>
+            </nav>
+
+            <div class="drawer-telemetry-strip">
+                <div class="strip-item">
+                    <span class="strip-label">MODEL WEIGHTS</span>
+                    <span class="strip-val font-mono">best.pt / best.onnx</span>
+                </div>
+                <div class="strip-item">
+                    <span class="strip-label">PHYSICS SENSOR</span>
+                    <span class="strip-val font-mono">Koschmieder LWIR</span>
+                </div>
+                <div class="strip-item">
+                    <span class="strip-label">FRAME PIPELINE</span>
+                    <span class="strip-val font-mono">CLAHE + NMS 0.45</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- MAIN COCKPIT VIEWPORT STACK -->
+    <main class="cockpit-viewport-area">
+
+        <!-- ======================================================== -->
+        <!-- VIEW 1: LIVE VISION & DASHCAM HUD (PRIMARY DEFAULT)      -->
+        <!-- ======================================================== -->
+        <section id="tab-stream" class="tab-pane active">
+            <div class="hud-main-stage">
+
+                <!-- The Primary 80% Camera Screen -->
+                <div class="camera-screen" id="streamContainer">
+                    
+                    <!-- HUD Aerospace Reticle Brackets -->
+                    <div class="reticle-bracket corner-tl"></div>
+                    <div class="reticle-bracket corner-tr"></div>
+                    <div class="reticle-bracket corner-bl"></div>
+                    <div class="reticle-bracket corner-br"></div>
+                    <div class="reticle-crosshair"></div>
+
+                    <!-- Top HUD Status Overlays -->
+                    <div class="hud-overlay-top-left">
+                        <div class="hud-pill hud-live-tag">
+                            <span class="hud-dot dot-live" id="streamIndicatorDot"></span>
+                            <span id="streamStatusBadge" class="font-mono">CAMERA 01 · STANDBY</span>
+                        </div>
+                        <div class="hud-sub-specs font-mono">
+                            <span>OPTIC: LWIR 8-14μm</span>
+                            <span>RES: 640×480 px</span>
+                        </div>
+                    </div>
+
+                    <!-- Hazard Threat Alert Dropdown Ribbon -->
+                    <div class="hud-hazard-banner" id="hazardAlertBanner">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span id="hazardAlertMessage">PATH CLEAR · NO IMMINENT HAZARDS DETECTED</span>
+                    </div>
+
+                    <div class="hud-overlay-top-right">
+                        <div class="hud-pill hud-engine-tag">
+                            <span class="font-mono">AI: YOLOv8 PERCEPTION</span>
+                        </div>
+                        <div class="hud-sub-specs font-mono text-right">
+                            <span>LATENCY: <strong id="hudLatency" class="stat-highlight">-- ms</strong></span>
+                            <span>RATE: <strong id="streamFpsBadge" class="stat-highlight">-- FPS</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Media Video & Stream Feed -->
+                    <div class="camera-canvas-wrapper" id="cameraCanvasWrapper">
+                        <video id="webcamVideo" autoplay playsinline muted class="camera-media hidden"></video>
+                        <img id="streamFeed" src="" alt="Live Thermal Stream" class="camera-media hidden">
+                        <canvas id="hiddenCanvas" style="display: none;"></canvas>
+
+                        <!-- Standby Radar Screen -->
+                        <div id="streamPlaceholder" class="camera-standby-screen">
+                            <div class="radar-reticle-box">
+                                <div class="radar-sweep"></div>
+                                <div class="radar-ring ring-1"></div>
+                                <div class="radar-ring ring-2"></div>
+                                <div class="radar-ring ring-3"></div>
+                                <i class="fa-solid fa-satellite-dish radar-center-icon"></i>
+                            </div>
+                            <h3 class="standby-title">THERMAL VISION DASHCAM READY</h3>
+                            <p class="standby-desc">Launch the <strong>Live Webcam Stream</strong> or <strong>Synthetic Thermal Simulator</strong> to engage real-time AI perception.</p>
+                            <div class="standby-cta-row">
+                                <button id="btnQuickStartWebcam" class="cockpit-btn btn-accent">
+                                    <i class="fa-solid fa-video"></i> START WEBCAM
+                                </button>
+                                <button id="btnQuickStartSim" class="cockpit-btn btn-secondary">
+                                    <i class="fa-solid fa-bolt"></i> RUN THERMAL SIM
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Proximity + Temperature Sensor Telemetry (Arduino Serial Monitor format) -->
+                    <div class="hud-overlay-proximity-sensor" id="proximitySensorHud">
+                        <div class="sensor-instrument-header">
+                            <span class="hud-data-label">PROXIMITY SENSOR</span>
+                            <span class="sensor-mock-badge font-mono" id="sensorStatusBadge">SENSOR: MOCK</span>
+                        </div>
+                        <div class="sensor-instrument-grid">
+                            <div class="sensor-instrument-col">
+                                <span class="sensor-col-label">Distance</span>
+                                <div class="hud-data-hero">
+                                    <span id="sensorDistanceVal" class="hud-big-num font-mono">225.29</span>
+                                    <span class="hud-unit">cm</span>
+                                </div>
+                            </div>
+                            <div class="sensor-instrument-col">
+                                <span class="sensor-col-label">MAX TEMPERATURE</span>
+                                <div class="hud-data-hero">
+                                    <span id="sensorMaxTempVal" class="hud-big-num font-mono text-amber">31.25</span>
+                                    <span class="hud-unit">°C</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom HUD Precision Data Overlays -->
+                    <div class="hud-overlay-bottom-left">
+                        <span class="hud-data-label">INFRARED VISIBILITY</span>
+                        <div class="hud-data-hero">
+                            <span id="hudVisRange" class="hud-big-num">--</span>
+                            <span class="hud-unit">m</span>
+                        </div>
+                        <div class="hud-data-sub font-mono">
+                            <span>TRANSMITTANCE τ: <strong id="hudTau" class="text-amber">--</strong></span>
+                            <span>BLUR: <strong id="hudLaplacian">--</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="hud-overlay-bottom-center">
+                        <div class="hud-fog-container">
+                            <div class="hud-fog-meta">
+                                <span class="hud-data-label"><i class="fa-solid fa-smog"></i> FOG SEVERITY</span>
+                                <span id="hudFogScore" class="hud-fog-percentage font-mono">0%</span>
+                            </div>
+                            <div class="hud-fog-bar-bg">
+                                <div id="hudFogBarFill" class="hud-fog-bar-fill" style="width: 0%;"></div>
+                            </div>
+                            <span id="hudFogLevel" class="hud-fog-classification">CLEAR / HIGH VISIBILITY</span>
+                        </div>
+                    </div>
+
+                    <div class="hud-overlay-bottom-right">
+                        <span class="hud-data-label text-right">TARGETS IDENTIFIED</span>
+                        <div class="hud-data-hero text-right">
+                            <span id="hudTargetCount" class="hud-big-num">0</span>
+                            <span class="hud-unit">OBJ</span>
+                        </div>
+                        <div class="hud-category-chips">
+                            <span class="cat-chip chip-ped" title="Pedestrians">
+                                <i class="fa-solid fa-person-walking"></i> <strong id="hudCntPed">0</strong>
+                            </span>
+                            <span class="cat-chip chip-veh" title="Vehicles">
+                                <i class="fa-solid fa-car"></i> <strong id="hudCntVeh">0</strong>
+                            </span>
+                            <span class="cat-chip chip-anm" title="Animals">
+                                <i class="fa-solid fa-cow"></i> <strong id="hudCntAnm">0</strong>
+                            </span>
+                            <span class="cat-chip chip-heat" title="Heat Signatures">
+                                <i class="fa-solid fa-fire"></i> <strong id="hudCntHeat">0</strong>
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Floating Automotive Control Dock -->
+                <div class="cockpit-dock-wrapper">
+                    <div class="cockpit-dock">
+                        <div class="dock-group">
+                            <button id="btnToggleWebcam" class="dock-btn" title="Toggle Live Webcam Feed">
+                                <i class="fa-solid fa-video"></i>
+                                <span>Webcam</span>
+                            </button>
+                            <button id="btnToggleSim" class="dock-btn" title="Toggle Synthetic Thermal Simulator">
+                                <i class="fa-solid fa-bolt"></i>
+                                <span>Simulator</span>
+                            </button>
+                            <button id="btnStopStream" class="dock-btn btn-danger-dock" title="Stop Current Stream">
+                                <i class="fa-solid fa-power-off"></i>
+                                <span>Stop</span>
+                            </button>
+                        </div>
+
+                        <div class="dock-divider"></div>
+
+                        <div class="dock-group">
+                            <button id="quickEnhanceBtn" class="dock-toggle active" title="Toggle CLAHE Thermal Enhancement">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                <span>CLAHE</span>
+                            </button>
+                            <button id="quickFogMaskBtn" class="dock-toggle active" title="Toggle Thermal Fog Heatmap Mask">
+                                <i class="fa-solid fa-layer-group"></i>
+                                <span>Heatmap</span>
+                            </button>
+                            <button id="btnFreezeFrame" class="dock-btn" title="Analyze Current Frame in Workbench">
+                                <i class="fa-solid fa-crosshairs"></i>
+                                <span>Inspect</span>
+                            </button>
+                        </div>
+
+                        <div class="dock-divider"></div>
+
+                        <div class="dock-group">
+                            <button class="dock-btn" id="dockSettingsBtn" title="Cockpit Settings & Thresholds">
+                                <i class="fa-solid fa-sliders"></i>
+                                <span>Tuning</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- VIEW 2: THERMAL ANALYSIS & ATMOSPHERIC PHYSICS           -->
+        <!-- ======================================================== -->
+        <section id="tab-thermal" class="tab-pane">
+            <div class="pane-editorial-layout">
+                
+                <!-- Main Thermal Visual Stage -->
+                <div class="editorial-visual-col">
+                    <div class="editorial-card visual-card">
+                        <div class="visual-header">
+                            <div class="title-with-badge">
+                                <span class="badge-label font-mono">LWIR INFRARED</span>
+                                <h3 class="section-heading">THERMAL PENETRATION VISUALIZATION</h3>
+                            </div>
+                            <div class="view-switch-toggles">
+                                <button class="switch-pill active" id="btnShowAnnotated">AI ANNOTATED</button>
+                                <button class="switch-pill" id="btnShowRaw">RAW THERMAL</button>
+                            </div>
+                        </div>
+
+                        <div class="thermal-viewport-box">
+                            <img id="thermalAnalysisImg" class="thermal-display-img" src="/static/samples/flir_highway_fog.jpg" alt="Thermal Analysis View">
+                        </div>
+
+                        <div class="physics-legend-strip font-mono">
+                            <span class="legend-item"><span class="legend-color color-cold"></span> COLD / ATMOSPHERE</span>
+                            <span class="legend-item"><span class="legend-color color-fog"></span> FOG SCATTERING</span>
+                            <span class="legend-item"><span class="legend-color color-warm"></span> AMBIENT SURFACES</span>
+                            <span class="legend-item"><span class="legend-color color-hot"></span> LWIR HEAT TARGET</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Editorial Atmospheric Physics Columns -->
+                <div class="editorial-data-col">
+                    <div class="editorial-card physics-hero-card">
+                        <span class="badge-label font-mono">ATMOSPHERIC OPTICAL PHYSICS</span>
+                        <h2 class="editorial-headline">SEE THROUGH<br>THE FOG.</h2>
+                        <p class="editorial-lead">
+                            While visible light scatters severely in dense water droplets (Mie scattering), Long-Wave Infrared (8–14 μm) penetrates attenuated media. Our physics pipeline calculates real-time transmittance &tau; and Koschmieder optical visibility to dynamically guide the YOLOv8 model.
+                        </p>
+
+                        <!-- Large Editorial Metrics Grid -->
+                        <div class="editorial-metrics-grid">
+                            <div class="editorial-stat-box">
+                                <span class="stat-caption">FOG DENSITY INDEX</span>
+                                <div class="stat-big-val font-mono">
+                                    <span id="analysisFogScore">67.9%</span>
+                                </div>
+                                <span id="analysisFogLevel" class="stat-badge badge-warning">MODERATE FOG</span>
+                            </div>
+
+                            <div class="editorial-stat-box">
+                                <span class="stat-caption">TRANSMITTANCE &tau;</span>
+                                <div class="stat-big-val font-mono">
+                                    <span id="analysisFogTau">0.32</span>
+                                </div>
+                                <span class="stat-footnote">Beer-Lambert Scattering</span>
+                            </div>
+
+                            <div class="editorial-stat-box">
+                                <span class="stat-caption">VISIBILITY RANGE</span>
+                                <div class="stat-big-val font-mono">
+                                    <span id="analysisFogVis">38.3</span><span class="unit-sm">m</span>
+                                </div>
+                                <span class="stat-footnote">Koschmieder Law</span>
+                            </div>
+
+                            <div class="editorial-stat-box">
+                                <span class="stat-caption">SPATIAL BLUR &nabla;&sup2;</span>
+                                <div class="stat-big-val font-mono">
+                                    <span id="analysisFogLaplacian">123.9</span>
+                                </div>
+                                <span class="stat-footnote">Laplacian Edge Variance</span>
+                            </div>
+
+                            <div class="editorial-stat-box">
+                                <span class="stat-caption">DYNAMIC CONTRAST</span>
+                                <div class="stat-big-val font-mono">
+                                    <span id="analysisContrast">24.15</span>
+                                </div>
+                                <span class="stat-footnote">Intensity &sigma; Std Dev</span>
+                            </div>
+
+                            <div class="editorial-stat-box">
+                                <span class="stat-caption">MEAN LUMINANCE</span>
+                                <div class="stat-big-val font-mono">
+                                    <span id="analysisMean">52.18</span>
+                                </div>
+                                <span class="stat-footnote">Gray Level Baseline</span>
+                            </div>
+                        </div>
+
+                        <!-- Physics Formula Annotation -->
+                        <div class="physics-formula-card">
+                            <div class="formula-title font-mono"><i class="fa-solid fa-atom"></i> LWIR Koschmieder Scattering Model</div>
+                            <div class="formula-text font-mono">
+                                V = 150.0 &times; (&tau;)<sup>1.2</sup> &nbsp;|&nbsp; &tau; = 1.0 - (F<sub>d</sub> / 100) &nbsp;|&nbsp; F<sub>d</sub> = f(&nabla;&sup2;, &sigma;)
+                            </div>
+                            <p class="formula-desc">Computes physical optical distance based on edge frequency attenuation and histogram dynamic range.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- VIEW 3: AI DETECTIONS & TARGET LOGS                      -->
+        <!-- ======================================================== -->
+        <section id="tab-detections" class="tab-pane">
+            <div class="pane-detections-layout">
+                
+                <!-- Left: Big Detection Viewport -->
+                <div class="detections-viewport-col">
+                    <div class="editorial-card">
+                        <div class="visual-header">
+                            <div>
+                                <span class="badge-label font-mono">YOLOv8 AI INFERENCE</span>
+                                <h3 class="section-heading">BOUNDING RECTANGLE PERCEPTION</h3>
+                            </div>
+                            <div class="detection-telemetry-badge font-mono">
+                                <span>LATENCY: <strong id="detLatencyMs" class="text-cyan">-- ms</strong></span>
+                            </div>
+                        </div>
+
+                        <div class="detection-viewport-wrapper">
+                            <img id="detectionsMainImage" class="thermal-display-img" src="/static/samples/flir_highway_fog.jpg" alt="Detections View">
+                        </div>
+
+                        <!-- Category Counters Row -->
+                        <div class="category-summary-row">
+                            <div class="cat-stat-card card-ped">
+                                <div class="cat-stat-icon"><i class="fa-solid fa-person-walking"></i></div>
+                                <div class="cat-stat-meta">
+                                    <span class="cat-stat-num font-mono" id="cntPedestrian">0</span>
+                                    <span class="cat-stat-label">PEDESTRIANS</span>
+                                </div>
+                            </div>
+                            <div class="cat-stat-card card-veh">
+                                <div class="cat-stat-icon"><i class="fa-solid fa-car"></i></div>
+                                <div class="cat-stat-meta">
+                                    <span class="cat-stat-num font-mono" id="cntVehicle">0</span>
+                                    <span class="cat-stat-label">VEHICLES</span>
+                                </div>
+                            </div>
+                            <div class="cat-stat-card card-anm">
+                                <div class="cat-stat-icon"><i class="fa-solid fa-cow"></i></div>
+                                <div class="cat-stat-meta">
+                                    <span class="cat-stat-num font-mono" id="cntAnimal">0</span>
+                                    <span class="cat-stat-label">ANIMALS</span>
+                                </div>
+                            </div>
+                            <div class="cat-stat-card card-heat">
+                                <div class="cat-stat-icon"><i class="fa-solid fa-fire"></i></div>
+                                <div class="cat-stat-meta">
+                                    <span class="cat-stat-num font-mono" id="cntHeat">0</span>
+                                    <span class="cat-stat-label">HEAT SIGNATURES</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Real-Time Detection Logs -->
+                <div class="detections-logs-col">
+                    <div class="editorial-card logs-card">
+                        <div class="visual-header">
+                            <div>
+                                <span class="badge-label font-mono">REAL-TIME TELEMETRY</span>
+                                <h3 class="section-heading">TARGET EVENT LOG</h3>
+                            </div>
+                            <span class="log-count-pill font-mono" id="totalTargetsBadge">0 TARGETS</span>
+                        </div>
+
+                        <div class="detections-scroll-list" id="detectionsList">
+                            <div class="empty-list">
+                                <i class="fa-solid fa-crosshairs radar-spin-slow"></i>
+                                <p>No targets currently identified in sensor view.</p>
+                            </div>
+                        </div>
+
+                        <div class="logs-card-footer font-mono">
+                            <span>IoU: <strong id="footerIou">0.45</strong></span>
+                            <span>CONF: <strong id="footerConf">0.25</strong></span>
+                            <span>ALGORITHM: NMS + CLAHE</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- VIEW 4: TELEMETRY & SYSTEM DIAGNOSTICS                   -->
+        <!-- ======================================================== -->
+        <section id="tab-analytics" class="tab-pane">
+            <div class="pane-telemetry-layout">
+                
+                <div class="telemetry-hero-header">
+                    <span class="badge-label font-mono">INSTRUMENTATION & TELEMETRY</span>
+                    <h2 class="editorial-headline">SYSTEM SENSORS & DIAGNOSTICS</h2>
+                    <p class="editorial-lead">High-frequency sensor telemetry for low-visibility autonomous navigation.</p>
+                </div>
+
+                <div class="telemetry-grid">
+                    <!-- Stat Card 1 -->
+                    <div class="editorial-card telem-stat-card">
+                        <div class="telem-header">
+                            <span class="telem-title">INFERENCE LATENCY</span>
+                            <i class="fa-solid fa-stopwatch text-cyan"></i>
+                        </div>
+                        <div class="telem-hero-num font-mono">
+                            <span id="latencyMs">-- ms</span>
+                        </div>
+                        <div class="telem-meter-bar">
+                            <div class="telem-meter-fill" style="width: 28%; background: var(--accent-cyan);"></div>
+                        </div>
+                        <span class="telem-sub">Target &lt; 50ms for Real-Time HUD</span>
+                    </div>
+
+                    <!-- Stat Card 2 -->
+                    <div class="editorial-card telem-stat-card">
+                        <div class="telem-header">
+                            <span class="telem-title">OPTICAL VISIBILITY</span>
+                            <i class="fa-solid fa-eye text-emerald"></i>
+                        </div>
+                        <div class="telem-hero-num font-mono">
+                            <span id="fogVisRange">-- m</span>
+                        </div>
+                        <div class="telem-meter-bar">
+                            <div class="telem-meter-fill" id="telemVisMeter" style="width: 45%; background: var(--accent-green);"></div>
+                        </div>
+                        <span class="telem-sub">Safe stopping distance window</span>
+                    </div>
+
+                    <!-- Stat Card 3 -->
+                    <div class="editorial-card telem-stat-card">
+                        <div class="telem-header">
+                            <span class="telem-title">ATMOSPHERIC DENSITY</span>
+                            <i class="fa-solid fa-smog text-amber"></i>
+                        </div>
+                        <div class="telem-hero-num font-mono">
+                            <span id="fogScore">0%</span>
+                        </div>
+                        <div class="progress-bg">
+                            <div id="fogProgressBar" class="progress-bar" style="width: 0%;"></div>
+                        </div>
+                        <span class="telem-sub" id="fogLevelText">--</span>
+                    </div>
+
+                    <!-- Stat Card 4 -->
+                    <div class="editorial-card telem-stat-card">
+                        <div class="telem-header">
+                            <span class="telem-title">ACTIVE TARGETS</span>
+                            <i class="fa-solid fa-bullseye text-red"></i>
+                        </div>
+                        <div class="telem-hero-num font-mono">
+                            <span id="targetCount">0</span>
+                        </div>
+                        <div class="telem-meter-bar">
+                            <div class="telem-meter-fill" style="width: 20%; background: var(--accent-red);"></div>
+                        </div>
+                        <span class="telem-sub font-mono">Transmittance &tau;: <strong id="fogTau">--</strong></span>
+                    </div>
+                </div>
+
+                <div class="telemetry-details-split">
+                    <!-- Class Distribution List -->
+                    <div class="editorial-card">
+                        <h4 class="card-mini-title"><i class="fa-solid fa-layer-group"></i> TARGET CLASS TAXONOMY</h4>
+                        <div class="class-breakdown-list" id="classBreakdown">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Technical Specs Card -->
+                    <div class="editorial-card">
+                        <h4 class="card-mini-title"><i class="fa-solid fa-shield-halved"></i> HARDWARE & SENSOR METRICS</h4>
+                        <div class="model-info-list font-mono">
+                            <div class="info-row"><span>Sensor Spectrum:</span> <strong>Long-Wave Infrared (8–14 μm)</strong></div>
+                            <div class="info-row"><span>Optical Law:</span> <strong>Koschmieder Atmospheric Scattering</strong></div>
+                            <div class="info-row"><span>Edge Dispersion:</span> <strong id="fogLaplacian">--</strong></div>
+                            <div class="info-row"><span>Contrast Std Dev:</span> <strong id="contrastVal">--</strong></div>
+                            <div class="info-row"><span>Luminance Mean:</span> <strong id="meanVal">--</strong></div>
+                            <div class="info-row"><span>Execution Platform:</span> <strong>Ultralytics YOLO Engine</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- VIEW 5: SAMPLE WORKBENCH & PRESET REEL                   -->
+        <!-- ======================================================== -->
+        <section id="tab-image" class="tab-pane">
+            <div class="pane-workbench-layout">
+                
+                <div class="workbench-header-bar">
+                    <div>
+                        <span class="badge-label font-mono">BENCHMARK EVALUATION</span>
+                        <h2 class="editorial-headline">THERMAL BENCHMARK WORKBENCH</h2>
+                    </div>
+                    <div class="workbench-action-strip">
+                        <button id="btnRunDetection" class="cockpit-btn btn-accent">
+                            <i class="fa-solid fa-bolt"></i> RUN THERMAL DETECTION
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sleek Horizontal Preset Carousel -->
+                <div class="preset-reel-wrapper">
+                    <div class="preset-reel-header">
+                        <span class="reel-label"><i class="fa-solid fa-images"></i> THERMAL SCENARIO PRESETS (FLIR / KAIST / SIH)</span>
+                        <span class="reel-note font-mono">Click to load and evaluate scenario</span>
+                    </div>
+                    <div class="preset-scroll-track" id="samplesContainer">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Workbench Main Grid -->
+                <div class="workbench-main-grid">
+                    
+                    <!-- Center Viewport -->
+                    <div class="editorial-card workbench-viewport-card">
+                        <div class="image-viewport" id="viewport">
+                            <div class="viewport-placeholder" id="viewportPlaceholder">
+                                <div class="reticle-box-small">
+                                    <i class="fa-solid fa-crosshairs radar-spin-slow"></i>
+                                </div>
+                                <p>Select a scenario preset above or drop a thermal file to analyze</p>
+                            </div>
+                            <img id="resultImage" class="result-img hidden" alt="Thermal Detection Output">
+                        </div>
+                    </div>
+
+                    <!-- Side Parameter Controls -->
+                    <div class="editorial-card workbench-controls-card">
+                        <h3 class="panel-sub-title"><i class="fa-solid fa-sliders"></i> DETECTION PARAMETERS</h3>
+
+                        <!-- Single Upload -->
+                        <div class="control-block">
+                            <label class="control-label">UPLOAD SINGLE IMAGE</label>
+                            <div class="drop-zone" id="dropZone">
+                                <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                                <p class="drop-text">Drop thermal image or <span>Browse</span></p>
+                                <input type="file" id="fileInput" accept="image/*" class="file-input">
+                            </div>
+                        </div>
+
+                        <!-- Dataset Archive Upload -->
+                        <div class="control-block">
+                            <label class="control-label"><i class="fa-solid fa-file-zipper"></i> IMPORT DATASET (.ZIP)</label>
+                            <div class="drop-zone dataset-zone" id="datasetDropZone">
+                                <i class="fa-solid fa-folder-plus drop-icon"></i>
+                                <p class="drop-text">Upload <span>.ZIP Archive</span> or multi-images</p>
+                                <input type="file" id="datasetFileInput" accept=".zip,image/*" multiple class="file-input">
+                            </div>
+                        </div>
+
+                        <!-- Sliders -->
+                        <div class="control-block">
+                            <div class="slider-meta">
+                                <label>CONFIDENCE THRESHOLD</label>
+                                <span id="confValue" class="val-badge font-mono">0.25</span>
+                            </div>
+                            <input type="range" id="confSlider" min="0.05" max="0.95" step="0.05" value="0.25">
+                        </div>
+
+                        <div class="control-block">
+                            <div class="slider-meta">
+                                <label>NMS IoU THRESHOLD</label>
+                                <span id="iouValue" class="val-badge font-mono">0.45</span>
+                            </div>
+                            <input type="range" id="iouSlider" min="0.10" max="0.90" step="0.05" value="0.45">
+                        </div>
+
+                        <!-- Toggles -->
+                        <div class="control-block toggle-row">
+                            <label class="toggle-label" for="enhanceToggle">
+                                <span><i class="fa-solid fa-wand-magic-sparkles"></i> Fog CLAHE Enhancement</span>
+                            </label>
+                            <input type="checkbox" id="enhanceToggle" checked>
+                        </div>
+
+                        <div class="control-block toggle-row">
+                            <label class="toggle-label" for="fogMaskToggle">
+                                <span><i class="fa-solid fa-smog"></i> Fog Heatmap Overlay</span>
+                            </label>
+                            <input type="checkbox" id="fogMaskToggle" checked>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ======================================================== -->
+        <!-- VIEW 6: MODEL INFORMATION & ARCHITECTURE                 -->
+        <!-- ======================================================== -->
+        <section id="tab-model" class="tab-pane">
+            <div class="pane-editorial-layout">
+                <div class="editorial-card model-dossier-card">
+                    <span class="badge-label font-mono">TECHNICAL DOSSIER</span>
+                    <h2 class="editorial-headline">THE INTELLIGENCE<br>BEHIND THE VISION.</h2>
+                    <p class="editorial-lead">
+                        Designed for real-time edge execution in low-visibility autonomous driving and operator monitoring.
+                    </p>
+
+                    <div class="dossier-spec-grid font-mono">
+                        <div class="dossier-box">
+                            <span class="dossier-label">NEURAL ARCHITECTURE</span>
+                            <span class="dossier-val">YOLOv8 Nano (v8n)</span>
+                            <span class="dossier-sub">Single-stage anchor-free CNN</span>
+                        </div>
+
+                        <div class="dossier-box">
+                            <span class="dossier-label">INPUT RESOLUTION</span>
+                            <span class="dossier-val">640 × 640 px</span>
+                            <span class="dossier-sub">3-channel normalized</span>
+                        </div>
+
+                        <div class="dossier-box">
+                            <span class="dossier-label">TRAINED CLASSES</span>
+                            <span class="dossier-val">9 Thermal Classes</span>
+                            <span class="dossier-sub">Humans, Vehicles, Wildlife, Heat</span>
+                        </div>
+
+                        <div class="dossier-box">
+                            <span class="dossier-label">PYTORCH WEIGHTS</span>
+                            <span class="dossier-val">best.pt (6.25 MB)</span>
+                            <span class="dossier-sub">FP16 optimized weights</span>
+                        </div>
+
+                        <div class="dossier-box">
+                            <span class="dossier-label">ONNX ENGINE</span>
+                            <span class="dossier-val">best.onnx (12.2 MB)</span>
+                            <span class="dossier-sub">Cross-platform runtime export</span>
+                        </div>
+
+                        <div class="dossier-box">
+                            <span class="dossier-label">TRANSFER DETECTOR</span>
+                            <span class="dossier-val">yolov8n.pt / .onnx</span>
+                            <span class="dossier-sub">COCO general object detection</span>
+                        </div>
+                    </div>
+
+                    <div class="dossier-pipeline-diagram font-mono">
+                        <div class="pipe-node">LWIR SENSOR INPUT</div>
+                        <div class="pipe-arr">&rarr;</div>
+                        <div class="pipe-node">ATMOSPHERIC SCATTERING &tau;</div>
+                        <div class="pipe-arr">&rarr;</div>
+                        <div class="pipe-node">CLAHE CONTRAST ENHANCEMENT</div>
+                        <div class="pipe-arr">&rarr;</div>
+                        <div class="pipe-node">YOLOv8 NMS DETECTION</div>
+                        <div class="pipe-arr">&rarr;</div>
+                        <div class="pipe-node">HAZARD THREAT CLASSIFIER</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FLOATING SETTINGS MODAL DRAWER -->
+    <div class="settings-modal-backdrop" id="settingsModalBackdrop">
+        <div class="settings-modal" id="settingsModal">
+            <div class="settings-header">
+                <h3><i class="fa-solid fa-sliders"></i> COCKPIT TUNING</h3>
+                <button class="settings-close" id="settingsCloseBtn">&times;</button>
+            </div>
+            <div class="settings-body">
+                <div class="setting-item">
+                    <label>Detection Confidence</label>
+                    <input type="range" id="modalConfSlider" min="0.05" max="0.95" step="0.05" value="0.25">
+                    <span id="modalConfVal" class="font-mono">0.25</span>
+                </div>
+                <div class="setting-item">
+                    <label>NMS IoU Threshold</label>
+                    <input type="range" id="modalIouSlider" min="0.10" max="0.90" step="0.05" value="0.45">
+                    <span id="modalIouVal" class="font-mono">0.45</span>
+                </div>
+                <div class="setting-item toggle-setting">
+                    <label>Audio Hazard Alarm</label>
+                    <input type="checkbox" id="modalAudioToggle" checked>
+                </div>
+                <div class="setting-item toggle-setting">
+                    <label>Automatic CLAHE Fog Penetration</label>
+                    <input type="checkbox" id="modalClaheToggle" checked>
+                </div>
+                <div class="setting-item toggle-setting">
+                    <label>Thermal Heatmap Density Mask</label>
+                    <input type="checkbox" id="modalHeatmapToggle" checked>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden compatibility nav-tabs for existing JS fallback -->
+    <nav class="hud-nav hidden-compat-nav" style="display: none;">
+        <button class="nav-tab active" data-tab="tab-image">Workbench</button>
+        <button class="nav-tab" data-tab="tab-stream">Stream</button>
+        <button class="nav-tab" data-tab="tab-analytics">Analytics</button>
+    </nav>
+
+    <!-- Core App Logic -->
+    <script src="/static/app.js"></script>
+</body>
+</html>

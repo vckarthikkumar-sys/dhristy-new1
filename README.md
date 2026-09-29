@@ -1,90 +1,60 @@
-# DRISHTI // Autonomous Mining Telemetry & Trajectory Predictive Safety
+# DRISHTI & Thermal Fog Detection Platform
 
-> **Enterprise-Grade Digital-Twin Mission Control with Anticipatory Risk Scoring & Telemetry Orchestration.**
+This repository integrates two complementary safety and perception systems for autonomous mining and industrial operations:
 
-DRISHTI elevates autonomous surface and underground mining safety beyond reactive geofence alarms into a **predictive, trajectory-based anticipatory safety system**. Rather than alerting only after an autonomous 400-ton haul truck enters a restricted blasting sector or geotech fault, DRISHTI computes continuous heading vectors, projects coordinates $N$ seconds forward, and delivers an exact **Time-To-Zone-Entry (TTZE)** countdown with automated intervention commands.
-
----
-
-## 🌟 Key Capabilities & Differentiators
-
-### 1. Mission Control UI/UX
-- **Aesthetic**: Obsidian dark glassmorphism (`backdrop-filter: blur(16px)`), precision border accents, cyan telemetry highlights, and amber/crimson reserved exclusively for threat states.
-- **Layered 2.5D Topographic Mine Map**: SVG bench contour elevation curves, real-time vehicle icons rotating with heading angles, historical breadcrumb trails, and forward projected trajectory rays.
-- **Typography**: Dual-type hierarchy pairing `Inter` for operational ergonomics and `JetBrains Mono` for GPS coordinates, velocity, bearings, and countdown tickers.
-- **Tactical Command Palette (`Cmd+K` / `Ctrl+K`)**: Instant search and teleportation across all fleet units, geofenced hazard zones, operational intervention actions, and demo scenarios.
-- **Audio Feedback**: Synthetic Web Audio API alerts and confirmations tailored for operations rooms.
-
-### 2. Predictive Intelligence Layer (The Differentiator)
-- **Linear Extrapolation Engine**: Projects vehicle position $P(t + \Delta t) = P_t + \vec{v} \cdot \Delta t$ across a 30-second forward horizon.
-- **Time-To-Zone-Entry (TTZE)**: Computes ray-polygon/radius intersections to calculate exact seconds before breach (e.g. `TTZE: 12s to Active Blasting Sector B-2`).
-- **Dynamic Threat Tiers**:
-  - `SAFE (0 - 29)`: Normal haulage transit.
-  - `WARNING (30 - 69)`: Encroaching upon safety buffer within 25 seconds.
-  - `CRITICAL (70 - 100)`: Imminent breach within 12 seconds or active violation.
-
-### 3. Enterprise Architecture & DevOps Maturity
-- **Observability**: Prometheus metrics exporter at `/metrics` (ingestion rate, alert latency, WebSocket connections, heap memory, calculation duration) + preconfigured `docker-compose.yml` with Prometheus & Grafana.
-- **Multi-Tenancy**: Site-scoped isolation supporting multiple mines (e.g. *Pit Alpha — Surface Copper* vs *Shaft Beta — Deep Sub-Level*).
-- **API & OpenAPI**: Versioned REST API (`/api/v1/...`) with auto-generated OpenAPI 3.0 / Swagger documentation at `/api/v1/docs`.
-- **Validation & Security**: Zod runtime schema validation on every ingestion payload and command parameter.
-- **CI/CD**: GitHub Actions workflow (`.github/workflows/ci.yml`) for linting, type-checking, and unit testing.
-
-### 4. Guided Pitch Demo Mode
-- **1-Click Scripted Scenario**: Triggerable via the top "Demo Scenario" button or Command Palette.
-- Accelerates CAT 797F #04 along a conflicting trajectory toward Active Blasting Sector B-2.
-- The TTZE countdown activates on the HUD, risk escalates from Safe to Warning to Critical, audio beacons trigger, and the operator dispatches an **Emergency Halt** or **Corridor Diversion** to safely resolve the incident.
+1. **DRISHTI (`/drishti`)**: Enterprise-Grade Digital-Twin Mission Control with Trajectory-Based Predictive Safety and telemetry orchestration.
+2. **Thermal Fog (`/thermalfog`)**: Vision AI system utilizing YOLOv8 and optical physics telemetry for high-accuracy obstacle detection and fog penetration under zero-visibility conditions.
 
 ---
 
-## 🚀 Quick Start
+## ðŸ“ Repository Architecture
 
-### Prerequisites
-- Node.js 18+ (tested on Node 20 / 24)
-- npm 9+
+```
+dhristy-new1/
+â”œâ”€â”€ drishti/              # REAL DRISHTI Control Room Application (React + Vite + Express + WebSocket)
+â”‚   â”œâ”€â”€ src/              # UI components, MineMap, 2.5D topography, digital twin simulator
+â”‚   â”œâ”€â”€ server/           # Express server, WebSocket gateway, telemetry ingestion, Prometheus metrics
+â”‚   â”œâ”€â”€ public/           # Static assets, map topography, calibrations
+â”‚   â”œâ”€â”€ package.json      # Dependencies and scripts (Ports 5173 & 4000)
+â”‚   â””â”€â”€ README.md         # DRISHTI documentation
+â”‚
+â”œâ”€â”€ thermalfog/           # Thermal Fog Vision AI Application (Flask + YOLOv8 + ONNX)
+â”‚   â”œâ”€â”€ app.py            # Flask API & Vision engine (Port 5000)
+â”‚   â”œâ”€â”€ static/           # Telemetry instruments, cockpit UI, CSS styling
+â”‚   â”œâ”€â”€ templates/        # Mission cockpit HTML interface
+â”‚   â”œâ”€â”€ api/              # Serverless handlers
+â”‚   â”œâ”€â”€ requirements.txt  # Python dependencies (Flask, ONNXRuntime, OpenCV)
+â”‚   â””â”€â”€ *.onnx / *.pt     # Trained YOLOv8 thermal perception models
+â”‚
+â””â”€â”€ .gitignore            # Multi-layer protection against committing secrets, node_modules, and cache
+```
 
-### Installation & Run
+---
+
+## âš¡ Inter-Application Communication
+
+The two systems remain decoupled and communicate across the network layer:
+
+- **Thermal Fog Engine (Port 5000)** processes live thermal camera feeds, calculates optical transmission ($\tau$), fog density scores ($0-100\%$), and obstacle bounding boxes.
+- **DRISHTI Telemetry Ingestion API (`POST /api/v1/telemetry/ingest` on Port 4000)** consumes vehicle status, position, and `thermalVision` telemetry payloads to calculate Time-To-Zone-Entry (TTZE) hazard alerts.
+- **Fleet Mode**: DRISHTI features a live toggle (`LIVE` vs `DEMO`) allowing control-room operators to switch between live Thermal Fog telemetry and simulated stress scenarios.
+
+---
+
+## ðŸš€ Quick Start
+
+### 1. Launch Thermal Fog Vision AI
 ```bash
-# Install dependencies
+cd thermalfog
+pip install -r requirements.txt
+python app.py
+# Runs on http://localhost:5000
+```
+
+### 2. Launch DRISHTI Mission Control
+```bash
+cd drishti
 npm install
-
-# Run backend (port 4000) and frontend (port 5173) concurrently
 npm run dev
+# Starts backend server on http://localhost:4000 and client UI on http://localhost:5173
 ```
-
-Open your browser:
-- **Mission Control Dashboard**: [http://localhost:5173](http://localhost:5173)
-- **OpenAPI / Swagger Spec**: [http://localhost:4000/api/v1/docs](http://localhost:4000/api/v1/docs)
-- **Prometheus Metrics**: [http://localhost:4000/metrics](http://localhost:4000/metrics)
-
----
-
-## 🧪 Testing & Verification
-
-```bash
-# Run Trajectory Math & Geofence Unit Tests
-npm test
-
-# Verify TypeScript type checking
-npm run typecheck
-
-# Verify Production Build
-npm run build
-```
-
----
-
-## 📊 Live System Endpoints
-
-| Endpoint | Method | Description |
-|---|---|---|
-| `/api/v1/sites` | `GET` | Multi-tenant mine sites list |
-| `/api/v1/vehicles` | `GET` | Fleet state, telemetry, and predictive risk scores |
-| `/api/v1/vehicles/:id/command` | `POST` | Intervene with Emergency Halt or Diversion |
-| `/api/v1/zones` | `GET` | Active blasting and restricted geofences |
-| `/api/v1/alerts` | `GET` | Active safety alert feed |
-| `/api/v1/alerts/:id/acknowledge` | `POST` | Operator alert acknowledgment |
-| `/api/v1/scenarios/trigger` | `POST` | Trigger scripted pitch presentation breach |
-| `/api/v1/docs` | `GET` | Interactive Swagger API documentation |
-| `/metrics` | `GET` | Prometheus telemetry & operational metrics |
-| `/ws` | `WS` | Real-time 1Hz digital-twin broadcast channel |

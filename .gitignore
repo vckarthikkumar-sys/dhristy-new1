@@ -1,11 +1,40 @@
-node_modules
-dist
-.vercel
+# Environment & Secrets
 .env
-.env.local
+.env.*
+*.env
+*.env.local
+
+# Node & Package Managers
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.DS_Store
 
-.vercel
+# Python & Caching
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Build & Bundler Outputs
+dist/
+build/
+.vercel/
+
+# Logs & Diagnostics
+*.log
+
+# OS & Editor Files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Machine Learning & Large Dataset Dumps
+runs/
+dataset_output/
+roboflow_dataset/
+dataset_roboflow/
+*.zip
+*.tar.gz
